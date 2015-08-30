@@ -57,7 +57,9 @@ app.initialize = function() {
 
 app.initialiseAccelerometer = function() {
     function onSuccess(acceleration) {
-	app.accelerometerHandler(acceleration.x, acceleration.y, acceleration.z)
+	app.accelerometerHandler(acceleration.x,
+				 acceleration.y,
+				 acceleration.z);
     }
 
     function onError(error) {
@@ -69,6 +71,7 @@ app.initialiseAccelerometer = function() {
 	onError,
 	{ frequency: 50 }
     );
+    console.log("End init accelerometer");
 };
 
 // app.initialiseGeolocation = function() {
@@ -112,13 +115,14 @@ app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ)
     }
 }
 
-app.latlongHandler = function(position) {
-    document.getElementById("locationInfo").innerHTML =
-	"latitude: " + position.coords.latitude
-	+ "longitude: " + position.coords.longitude;
-}
+// app.latlongHandler = function(position) {
+//     document.getElementById("locationInfo").innerHTML =
+// 	"latitude: " + position.coords.latitude
+// 	+ "longitude: " + position.coords.longitude;
+// }
 
 app.sendPost = function(postType) {
+    console.log("Post type: " + postType);
     var url = "https://www.salesforce.com/servlet/servlet.WebToCase";
     var method = "POST";
     var postData = "?encoding=UTF-8&debug=1&orgid=00D24000000dWDe&subject="
@@ -137,7 +141,8 @@ app.sendPost = function(postType) {
     }
 
     request.open(method, url, async);
-    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    request.setRequestHeader("Content-Type",
+			     "application/x-www-form-urlencoded");
     request.send(postData);
 }
 
@@ -157,8 +162,8 @@ app.onDeviceReady = function()
     $('#deviceName').val(app.deviceName);
 
     // start accelerometer
-    app.initialiseAccelerometer();
     console.log("Initialise accelerometer");
+    app.initialiseAccelerometer();
 };
 
 /**
@@ -213,6 +218,7 @@ app.pollStatus = setInterval(function() {
 		if(view[0] == app.button1press
 		   || view[0] == app.button2press) {
 		    // pass
+		    app.sendPost("Fall Detection Cancelled by User");
 		}
 	    }, 
 	    function(error) {
