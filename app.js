@@ -89,12 +89,13 @@ app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ)
 }
 
 app.sendPost = function(postType) {
+    console.log("Post Type: " + postType);
+    console.log("Email Address: " + app.emailAddress);
     var url = "https://www.salesforce.com/servlet/servlet.WebToCase";
     var method = "POST";
-    var postData = "?encoding=UTF-8&debug=1&orgid=00D24000000dWDe"
+    var postData = "?encoding=UTF-8&debug=1&orgid=00D24000000dWDe&origin=Web&Type=Debug"
 	+"&subject=" + postType 
 	+"&description=" + postType 
-	+"&origin=Web&Type=Debug"
 	+"&email="+ app.emailAddress;
     var async = false;
     var request = new XMLHttpRequest();
@@ -179,14 +180,13 @@ app.pollStatus = setInterval(function() {
 		document.getElementById("statusInfo").innerHTML = "Sent: " + app.state
 		    + ", Current: " + view[0];
 		if(view[0] == 4 || view[0] == 5) {
-		    app.sendPost("Fall Alert Cancelled");
 		    app.device.writeCharacteristic(
     			'0000a002-0000-1000-8000-00805f9b34fb',
     			0,
     			function() { console.log('LED toggled successfully!'); },
     			function(error) { console.log('LED toggle failed: ' + error); }
 		    );
-
+		    app.sendPost("Fall Alert Cancelled");
 		}
 	    }, 
 	    function(error) {
