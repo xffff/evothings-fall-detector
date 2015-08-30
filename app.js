@@ -36,6 +36,8 @@ app.ledON = 1;
 
 app.numFalls = 1;
 
+app.emailAddress = "michael.murphy@capgemini.com";
+
 /**
  * Connected device.
  */
@@ -82,14 +84,18 @@ app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ)
 	console.log(app.numFalls + " falls detected!!");
 	app.numFalls++;
 	app.onToggleButton();
-	app.sendPost();
+	app.sendPost("Fall Detected");
     }
 }
 
-app.sendPost = function() {
+app.sendPost = function(postType) {
     var url = "https://www.salesforce.com/servlet/servlet.WebToCase";
     var method = "POST";
-    var postData = "?encoding=UTF-8&debug=1&orgid=00D24000000dWDe&subject=Fall Detected&description=Fall Detected&origin=Web&Type=Debug&email=michael.murphy@capgemini.com";
+    var postData = "?encoding=UTF-8&debug=1&orgid=00D24000000dWDe"
+	+"&subject=" + postType 
+	+"&description=" + postType 
+	+"&origin=Web&Type=Debug"
+	+"&email="+ app.emailAddress;
     var async = false;
     var request = new XMLHttpRequest();
 
@@ -172,6 +178,16 @@ app.pollStatus = setInterval(function() {
 		var view = new Uint8Array(data);
 		document.getElementById("statusInfo").innerHTML = "Sent: " + app.state
 		    + ", Current: " + view[0];
+		if(view[0] == 4 || view[0] == 5) {
+		    app.sendPost("Fall Alert Cancelled");
+		    app.device.writeCharacteristic(
+    			'0000a002-0000-1000-8000-00805f9b34fb',
+    			0,
+    			function() { console.log('LED toggled successfully!'); },
+    			function(error) { console.log('LED toggle failed: ' + error); }
+		    );
+
+		}
 	    }, 
 	    function(error) {
     		console.log("Error: Read characteristic failed: " + error);
@@ -225,6 +241,7 @@ app.readServices = function(device)
 app.onConnectButton = function() {
     // Get device name from text field.
     app.deviceName = $('#deviceName').val();
+    app.emailAddress= $('#emailAddress').val();
 
     // Save it for next time we use the app.
     localStorage.setItem('deviceName', app.deviceName);
