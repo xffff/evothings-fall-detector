@@ -71,24 +71,24 @@ app.initialiseAccelerometer = function() {
     );
 };
 
-app.initialiseGeolocation = function() {
-    function onSuccess(position) {
-	app.accelerometerHandler(position);
-    }
+// app.initialiseGeolocation = function() {
+//     function onSuccess(position) {
+// 	app.accelerometerHandler(position);
+//     }
     
-    function onError(error) {
-	console.log("Geolocation error: " + error);
-    }
+//     function onError(error) {
+// 	console.log("Geolocation error: " + error);
+//     }
     
-    navigator.geolocation.getCurrentPosition(
-	onSuccess,
-	onError,
-	{
-	    enableHighAccuracy: true,
-	    timeout:5000
-	}
-    );
-};
+//     navigator.geolocation.getCurrentPosition(
+// 	onSuccess,
+// 	onError,
+// 	{
+// 	    enableHighAccuracy: true,
+// 	    timeout:5000
+// 	}
+//     );
+// };
 
 app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ) {
     function absGrav(x) {
@@ -124,7 +124,7 @@ app.sendPost = function(postType) {
     var postData = "?encoding=UTF-8&debug=1&orgid=00D24000000dWDe&subject="
 	+ postType
 	+ "&description=Fall Detected&origin=Web&Type=Debug&email="
-	+ app.emailAddress // hurr durr xss
+	+ app.emailAddress
 	+ "&lat=" + app.latitude
 	+ "&long=" + app.longitude;
     var async = false;
@@ -209,10 +209,11 @@ app.pollStatus = setInterval(function() {
 		var view = new Uint8Array(data);
 		document.getElementById("statusInfo").innerHTML = "Sent: " + app.state
 		    + ", Current: " + view[0];
-		// if(view[0] == app.button1press
-		//    || view[0] == app.button2press) {
-		//     app.sendPost("Fall Cancelled");
-		// }
+
+		if(view[0] == app.button1press
+		   || view[0] == app.button2press) {
+		    // pass
+		}
 	    }, 
 	    function(error) {
     		console.log("Error: Read characteristic failed: " + error);
