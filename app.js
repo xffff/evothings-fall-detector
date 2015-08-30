@@ -34,11 +34,7 @@ app.ledSlowFlash1 = 1;
 app.ledOFF  = 0;
 app.ledON = 1;
 
-app.emailAddress = "";
-
 app.numFalls = 1;
-app.latitude = 0;
-app.longitude = 0;
 
 /**
  * Connected device.
@@ -57,41 +53,19 @@ app.initialize = function() {
 
 app.initialiseAccelerometer = function() {
     function onSuccess(acceleration) {
-	app.accelerometerHandler(acceleration.x,
-				 acceleration.y,
-				 acceleration.z);
+	app.accelerometerHandler(acceleration.x, acceleration.y, acceleration.z)
     }
 
     function onError(error) {
-	console.log('Accelerometer error: ' + error);
+	console.log('Accelerometer error: ' + error)
     }
 
     navigator.accelerometer.watchAcceleration (
 	onSuccess,
 	onError,
 	{ frequency: 50 }
-    );
-    console.log("End init accelerometer");
+    )
 };
-
-// app.initialiseGeolocation = function() {
-//     function onSuccess(position) {
-// 	app.accelerometerHandler(position);
-//     }
-    
-//     function onError(error) {
-// 	console.log("Geolocation error: " + error);
-//     }
-    
-//     navigator.geolocation.getCurrentPosition(
-// 	onSuccess,
-// 	onError,
-// 	{
-// 	    enableHighAccuracy: true,
-// 	    timeout:5000
-// 	}
-//     );
-// };
 
 app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ) {
     function absGrav(x) {
@@ -102,35 +76,20 @@ app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ)
     var dx = absGrav(accelerationX);
     var dy = absGrav(accelerationY);
     var dz = absGrav(accelerationZ);
-    document.getElementById("accInfo").innerHTML =
-	"dx: " + dx
-	+ "<br /> ; dy: " + dy
-	+ "<br /> ; dz: " + dz;
+    document.getElementById("accInfo").innerHTML = "dx: " + dx + " ; dy: " + dy + " ; dz: " + dz;
 
     if(dx+dy+dz > 2){
 	console.log(app.numFalls + " falls detected!!");
 	app.numFalls++;
 	app.onToggleButton();
-	app.sendPost("Fall detected");
+	app.sendPost();
     }
 }
 
-// app.latlongHandler = function(position) {
-//     document.getElementById("locationInfo").innerHTML =
-// 	"latitude: " + position.coords.latitude
-// 	+ "longitude: " + position.coords.longitude;
-// }
-
-app.sendPost = function(postType) {
-    console.log("Post type: " + postType);
+app.sendPost = function() {
     var url = "https://www.salesforce.com/servlet/servlet.WebToCase";
     var method = "POST";
-    var postData = "?encoding=UTF-8&debug=1&orgid=00D24000000dWDe&subject="
-	+ postType
-	+ "&description=Fall Detected&origin=Web&Type=Debug&email="
-	+ app.emailAddress
-	+ "&lat=" + app.latitude
-	+ "&long=" + app.longitude;
+    var postData = "?encoding=UTF-8&debug=1&orgid=00D24000000dWDe&subject=Fall Detected&description=Fall Detected&origin=Web&Type=Debug&email=michael.murphy@capgemini.com";
     var async = false;
     var request = new XMLHttpRequest();
 
@@ -141,8 +100,7 @@ app.sendPost = function(postType) {
     }
 
     request.open(method, url, async);
-    request.setRequestHeader("Content-Type",
-			     "application/x-www-form-urlencoded");
+    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     request.send(postData);
 }
 
@@ -152,7 +110,7 @@ app.sendPost = function(postType) {
 app.onDeviceReady = function()
 {
     // Report status.
-    app.showInfo('Enter BLE device name and your email address and tap Connect');
+    app.showInfo('Enter BLE device name and tap Connect');
 
     // Show the saved device name, if any.
     var name = localStorage.getItem('deviceName');
@@ -162,8 +120,8 @@ app.onDeviceReady = function()
     $('#deviceName').val(app.deviceName);
 
     // start accelerometer
-    console.log("Initialise accelerometer");
     app.initialiseAccelerometer();
+    console.log("Initialise accelerometer");
 };
 
 /**
@@ -214,12 +172,6 @@ app.pollStatus = setInterval(function() {
 		var view = new Uint8Array(data);
 		document.getElementById("statusInfo").innerHTML = "Sent: " + app.state
 		    + ", Current: " + view[0];
-
-		if(view[0] == app.button1press
-		   || view[0] == app.button2press) {
-		    // pass
-		    app.sendPost("Fall Detection Cancelled by User");
-		}
 	    }, 
 	    function(error) {
     		console.log("Error: Read characteristic failed: " + error);
@@ -273,11 +225,9 @@ app.readServices = function(device)
 app.onConnectButton = function() {
     // Get device name from text field.
     app.deviceName = $('#deviceName').val();
-    app.emailAddress = $('#emailAddress').val();
 
     // Save it for next time we use the app.
     localStorage.setItem('deviceName', app.deviceName);
-    localStorage.setItem('emailAddress', app.emailAddress);
 
     // Call stop before you start, just in case something else is running.
     evothings.easyble.stopScan();
