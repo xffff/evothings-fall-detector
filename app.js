@@ -15,8 +15,6 @@
  */
 var app = {};
 
-app.state = 0;
-
 /**
  * Name of device to connect to.
  */
@@ -25,15 +23,7 @@ app.deviceName = 'Dave';
 /**
  * state defines
  */
-app.button2press = 6;
-app.button1press = 5;
-app.ledFastFlash2 = 4;
-app.ledFastFlash1 = 3;
-app.ledSlowFlash2 = 2;
-app.ledSlowFlash1 = 1;
-app.ledOFF  = 0;
-app.ledON = 1;
-
+app.state = 0;
 app.numFalls = 1;
 
 app.emailAddress = "michael.murphy@capgemini.com";
@@ -177,14 +167,14 @@ app.pollStatus = setInterval(function() {
     	    '0000a001-0000-1000-8000-00805f9b34fb',
     	    function(data) {
 		var view = new Uint8Array(data);
-		document.getElementById("statusInfo").innerHTML = "Sent: " + app.state
-		    + ", Current: " + view[0];
-		if(view[0] == 4 || view[0] == 5) {
+		document.getElementById("statusInfo").innerHTML = "Sent: " + app.state + ", Current: " + view[0];
+
+		if(view[0] == 4 || view[0] == 5 && app.state != 4) {
 		    app.device.writeCharacteristic(
     			'0000a002-0000-1000-8000-00805f9b34fb',
     			0,
-    			function() { console.log('LED toggled successfully!'); },
-    			function(error) { console.log('LED toggle failed: ' + error); }
+    			function() { console.log('Button toggle recieved'); },
+    			function(error) { console.log('Button toggle error' + error); }
 		    );
 		    app.sendPost("Fall Alert Cancelled");
 		}
