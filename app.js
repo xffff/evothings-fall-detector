@@ -252,12 +252,14 @@ app.onConnectButton = function() {
 
 app.onFall = function() {
     console.log("state: " + app.state);
+    if(app.state == 0)
+      { app.state = 1; }
+    app.writeToBle(app.state);
+}
 
+app.writeToBle = function(newState) {
     var ledState = new Uint8Array(1);
-    if(app.state < 3)
-      { app.state++; }
-    ledState[0] = app.state;
-
+    ledState = newState;
     app.device.writeCharacteristic(
     	'0000a002-0000-1000-8000-00805f9b34fb',
     	ledState,
