@@ -169,7 +169,8 @@ app.pollStatus = setInterval(function() {
 		var view = new Uint8Array(data);
 		document.getElementById("statusInfo").innerHTML = "Sent: " + app.state + ", Current: " + view[0];
 
-		if(view[0] == 4 || view[0] == 5 && app.state != 4) {
+		if((view[0] == 4 && app.state != 4)
+		  && (view[0] == 5 && app.state != 5)) {
 		    app.device.writeCharacteristic(
     			'0000a002-0000-1000-8000-00805f9b34fb',
     			0,
