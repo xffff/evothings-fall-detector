@@ -148,15 +148,13 @@ app.startScan = function()
 	    console.log(device.name + ' : ' + device.address.toString().split(':').join(''))
 
 	    // If my device is found connect to it.
-	    if (device.hasName(app.deviceName))
-	    {
+	    if (device.hasName(app.deviceName)) {
 		app.showInfo('Status: Device found: ' + deviceName);
 		evothings.easyble.stopScan();
 		app.connectToDevice(device);
 	    }
 	},
-	function(error)
-	{
+	function(error) {
 	    app.showInfo('Error: startScan: ' + error);
 	});
 };
@@ -170,14 +168,9 @@ app.pollStatus = setInterval(function() {
 		var view = new Uint8Array(data);
 		document.getElementById("statusInfo").innerHTML = "Sent: " + app.state + ", Current: " + view[0];
 
-		if((view[0] == 4 && app.state != 4)
-		   && (view[0] == 5 && app.state != 5)) {
-		    app.device.writeCharacteristic(
-    			'0000a002-0000-1000-8000-00805f9b34fb',
-    			0,
-    			function() { console.log('Button toggle recieved'); },
-    			function(error) { console.log('Button toggle error' + error); }
-		    );
+		/* should only be able to cancel if the state is 3 .. ie. a fall was detected and sent */
+		if(view[0]==3) {
+		    app.writeToBle(0);
 		    app.sendPost("Fall Alert Cancelled");
 		}
 	    }, 
@@ -253,7 +246,7 @@ app.onConnectButton = function() {
 app.onFall = function() {
     console.log("state: " + app.state);
     if(app.state == 0)
-      { app.state = 1; }
+      { app.state = 3; }
     app.writeToBle(app.state);
 }
 
