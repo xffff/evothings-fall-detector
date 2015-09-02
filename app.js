@@ -73,7 +73,8 @@ app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ)
     if(dx+dy+dz > 2){
 	console.log(app.numFalls + " falls detected!!");
 	app.numFalls++;
-	app.onToggleButton();
+	app.onFall();
+	// app.onToggleButton();
 	app.sendPost("Fall Detected");
     }
 }
@@ -248,6 +249,22 @@ app.onConnectButton = function() {
     app.startScan();
     app.showInfo('Status: Scanning...');
 };
+
+app.onFall = function() {
+    console.log("state: " + app.state);
+
+    var ledState = new Uint8Array(1);
+    if(app.state < 3)
+      { app.state++; }
+    ledState[0] = app.state;
+
+    app.device.writeCharacteristic(
+    	'0000a002-0000-1000-8000-00805f9b34fb',
+    	ledState,
+    	function() { console.log('LED toggled successfully!'); },
+    	function(error) { console.log('LED toggle failed: ' + error); }
+    );
+}
 
 /**
  * Toggle the LED on/off.
