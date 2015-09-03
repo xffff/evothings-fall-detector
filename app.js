@@ -70,12 +70,14 @@ app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ)
     var dz = absGrav(accelerationZ);
     document.getElementById("accInfo").innerHTML = "dx: " + dx + " ; dy: " + dy + " ; dz: " + dz;
 
-    if(dx+dy+dz > 2){
-	console.log(app.numFalls + " falls detected!!");
-	app.numFalls++;
-	app.onFall();
-	// app.onToggleButton();
-	app.sendPost("Fall Detected");
+    if(app.isConnected) {
+	if(dx+dy+dz > 2){
+	    console.log(app.numFalls + " falls detected!!");
+	    app.numFalls++;
+	    app.onFall();
+	    // app.onToggleButton();
+	    app.sendPost("Fall Detected");
+	}
     }
 }
 
@@ -107,6 +109,8 @@ app.sendPost = function(postType) {
  */
 app.onDeviceReady = function()
 {
+    app.isConnected = true;
+
     // Report status.
     app.showInfo('Enter BLE device name and tap Connect');
 

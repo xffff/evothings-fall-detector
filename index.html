@@ -26,11 +26,11 @@
     <title>Fall Detector</title>
 
     <style>
-      @import 'ui/css/evothings-app.css';
       @import 'https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css'
     </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
 
     <style>
       #connectButton {
@@ -65,12 +65,6 @@
   </head>
 
   <body ontouchstart=""><!-- ontouchstart="" enables low-delay CSS transitions. -->
-    <header>
-      <button class="back" onclick="history.back()">
-	<img src="ui/images/arrow-left.svg" />
-      </button>
-      <img class="logotype" src="ui/images/logo.svg" alt="Evothings" />
-    </header>
 
     <div class="jumbotron">
       <h1>Fall Detector </h1>
@@ -80,15 +74,15 @@
     <div class="input-group">
       <input id="deviceName" placeholder="Enter your device name" value="Dave" type="text" class="form-control"/>
       <input id="emailAddress" placeholder="Enter your email address" value="michael.murphy@capgemini.com" type="email" class="form-control"/>
+
+      <button id="connectButton" class="btn btn-default" onclick="app.onConnectButton()">
+	Connect
+      </button>
     </div>
 
-    <button id="connectButton" class="btn btn-default" onclick="app.onConnectButton()">
-      Connect
-    </button>
-
-    <button id="toggleButton" class="btn red" onclick="app.onToggleButton()">
-      Toggle LED
-    </button>
+    <!-- <button id="toggleButton" class="btn red" onclick="app.onToggleButton()"> -->
+    <!--   Toggle LED -->
+    <!-- </button> -->
     
     <br />
 
