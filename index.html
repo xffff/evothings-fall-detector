@@ -72,13 +72,19 @@
 
 
     <div class="input-group">
-      <input id="deviceName" placeholder="Enter your device name" value="Dave" type="text" class="form-control"/>
-      <input id="emailAddress" placeholder="Enter your email address" value="michael.murphy@capgemini.com" type="email" class="form-control"/>
 
-      <button id="connectButton" class="btn btn-default" onclick="app.onConnectButton()">
-	Connect
-      </button>
+	<span class="input-group-addon" id="input-label-1">Device Name</span>
+	<input id="deviceName" placeholder="Enter your device name" value="Dave" type="text" class="form-control" aria-described-by="input-label-1"/>
+</div>
+    <div class="input-group">
+	<span class="input-group-addon" id="input-label-2">Email</span>
+	<input id="emailAddress" placeholder="Enter your email address" value="michael.murphy@capgemini.com" type="email" class="form-control" aria-described-by="input-label-2"/>
+      </div>
     </div>
+
+    <button id="connectButton" class="btn btn-default" onclick="app.onConnectButton()" style="margin-top: 10px">
+      Connect
+    </button>
 
     <!-- <button id="toggleButton" class="btn red" onclick="app.onToggleButton()"> -->
     <!--   Toggle LED -->
@@ -86,7 +92,7 @@
     
     <br />
 
-    <div class="well">
+    <div class="well" style="margin-top: 50px">
       <p id="info">Not Connected</p>
       <p id="statusInfo">Status NULL</p>
       <p id="accInfo">dx: null ; <br /> dy: null ; <br /> dz: null</p>
