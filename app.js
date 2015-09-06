@@ -26,7 +26,7 @@ app.deviceName = 'Dave';
  */
 app.sentState = 0;
 app.numFalls = 1;
-
+app.maxG = 0;
 app.emailAddress = "michael.murphy@capgemini.com";
 
 /**
@@ -50,7 +50,7 @@ app.initialiseAccelerometer = function() {
     }
 
     function onError(error) {
-	console.log('Accelerometer error: ' + error);
+	console.log('Accelerometer error: ' + JSON.stringify(error));
     }
 
     navigator.accelerometer.watchAcceleration (
@@ -66,13 +66,25 @@ app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ)
     }
 
     var grav = 9.81;
-    var dx = absGrav(accelerationX).toFixed(4);
-    var dy = absGrav(accelerationY).toFixed(4);
-    var dz = absGrav(accelerationZ).toFixed(4);
-    document.getElementById("accInfo").innerHTML = "dx: " + dx + " ; dy: " + dy + " ; dz: " + dz;
+    var dx = absGrav(accelerationX);
+    var dy = absGrav(accelerationY);
+    var dz = absGrav(accelerationZ);
+    var total = dx+dy+dz;
+    app.maxG = total > app.maxG
+	? total
+	: app.maxG;
 
-    if(isConnected) {
-	if(dx+dy+dz > 1){
+    document.getElementById("accInfo").innerHTML =
+	"dx: " + dx.toFixed(4)
+	+ " ; dy: " + dy.toFixed(4)
+	+ " ; dz: " + dz.toFixed(4)
+	+ "<br/> Total: " + total
+	+ " ; Max: " + app.maxG.toFixed(4);
+    
+
+    if(dx+dy+dz > 5.5){
+	console.log("Accelerometer event");
+	if(app.isConnected == true) {
 	    console.log(app.numFalls + " falls detected!!");
 	    app.numFalls++;
 	    app.onFall();
@@ -177,6 +189,7 @@ app.pollStatus = setInterval(function() {
 		   && app.sentState == 3) {
 		    app.writeToBle(0);
 		    app.sendPost("Fall Alert Cancelled");
+		    app.showInfo("Fall Alert Canncelled");
 		}
 	    }, 
 	    function(error) {
