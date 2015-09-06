@@ -23,7 +23,7 @@ app.deviceName = 'Dave';
 /**
  * state defines
  */
-app.state = 0;
+app.sentState = 0;
 app.numFalls = 1;
 
 app.emailAddress = "michael.murphy@capgemini.com";
@@ -45,18 +45,18 @@ app.initialize = function() {
 
 app.initialiseAccelerometer = function() {
     function onSuccess(acceleration) {
-	app.accelerometerHandler(acceleration.x, acceleration.y, acceleration.z)
+	app.accelerometerHandler(acceleration.x, acceleration.y, acceleration.z);
     }
 
     function onError(error) {
-	console.log('Accelerometer error: ' + error)
+	console.log('Accelerometer error: ' + error);
     }
 
     navigator.accelerometer.watchAcceleration (
 	onSuccess,
 	onError,
 	{ frequency: 50 }
-    )
+    );
 };
 
 app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ) {
@@ -65,9 +65,9 @@ app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ)
     }
 
     var grav = 9.81;
-    var dx = absGrav(accelerationX);
-    var dy = absGrav(accelerationY);
-    var dz = absGrav(accelerationZ);
+    var dx = absGrav(accelerationX).toFixed(2);
+    var dy = absGrav(accelerationY).toFixed(2);
+    var dz = absGrav(accelerationZ).toFixed(2);
     document.getElementById("accInfo").innerHTML = "dx: " + dx + " ; dy: " + dy + " ; dz: " + dz;
 
     if(app.isConnected) {
@@ -75,7 +75,6 @@ app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ)
 	    console.log(app.numFalls + " falls detected!!");
 	    app.numFalls++;
 	    app.onFall();
-	    // app.onToggleButton();
 	    app.sendPost("Fall Detected");
 	}
     }
@@ -87,9 +86,9 @@ app.sendPost = function(postType) {
     var url = "https://www.salesforce.com/servlet/servlet.WebToCase";
     var method = "POST";
     var postData = "?encoding=UTF-8&debug=1&orgid=00D24000000dWDe&origin=Web&Type=Debug"
-	+"&subject=" + postType 
-	+"&description=" + postType 
-	+"&email="+ app.emailAddress;
+	+ "&subject=" + postType 
+	+ "&description=" + postType 
+	+ "&email=" + app.emailAddress;
     var async = false;
     var request = new XMLHttpRequest();
 
@@ -97,20 +96,21 @@ app.sendPost = function(postType) {
 	var status = request.status;
 	var data = request.responseText;
 	console.log("response: " + data);
-    }
+    };
 
-    request.open(method, url, async);
-    request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-    request.send(postData);
+    try {
+	request.open(method, url, async);
+	request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+	request.send(postData);
+    } catch (exception) {
+	console.log("Exception sending post: " + exception);
+    }
 }
 
 /**
  * When low level initialization complete, this function is called.
  */
-app.onDeviceReady = function()
-{
-    app.isConnected = true;
-
+app.onDeviceReady = function() {
     // Report status.
     app.showInfo('Enter BLE device name and tap Connect');
 
@@ -129,8 +129,7 @@ app.onDeviceReady = function()
 /**
  * Print debug info to console and application UI.
  */
-app.showInfo = function(info)
-{
+app.showInfo = function(info) {
     document.getElementById('info').innerHTML = info;
     console.log(info);
 };
@@ -138,18 +137,16 @@ app.showInfo = function(info)
 /**
  * Scan for device and connect.
  */
-app.startScan = function()
-{
+app.startScan = function() {
     evothings.easyble.startScan(
-	function(device)
-	{
+	function(device) {
 	    // Do not show un-named devices.
 	    var deviceName = device.advertisementData ?
-		device.advertisementData.kCBAdvDataLocalName : null
+		device.advertisementData.kCBAdvDataLocalName : null;
 	    if (!device.name) { return }
 
 	    // Print "name : mac address" for every device found.
-	    console.log(device.name + ' : ' + device.address.toString().split(':').join(''))
+	    console.log(device.name + ' : ' + device.address.toString().split(':').join(''));
 
 	    // If my device is found connect to it.
 	    if (device.hasName(app.deviceName)) {
@@ -170,12 +167,19 @@ app.pollStatus = setInterval(function() {
     	    '0000a001-0000-1000-8000-00805f9b34fb',
     	    function(data) {
 		var view = new Uint8Array(data);
-		document.getElementById("statusInfo").innerHTML = "Sent: " + app.state + ", Current: " + view[0];
-
+		var readState = view[0];
+		
+		document.getElementById("statusInfo").innerHTML = "Sent: " + app.sentState + ", Current: " + readState;
+		console.log("Read state: " + readState + ", Sent state: " + app.sentState);
+	
 		/* should only be able to cancel if the state is 3 .. ie. a fall was detected and sent */
-		if(view[0]==3) {
-		    app.writeToBle(0);
+		if((readState == 4 || readState == 5)
+		   && app.sentState == 3) {
 		    app.sendPost("Fall Alert Cancelled");
+		}
+
+		if(app.sentState != readState) {
+		    app.writeToBle(app.sentState);
 		}
 	    }, 
 	    function(error) {
@@ -196,7 +200,8 @@ app.connectToDevice = function(device)
 	    app.device = device;
 	    app.showInfo('Status: Connected');
 	    app.readServices(app.device);
-	    app.pollStatus();
+	    app.pollStatus;
+	    app.isConnected = true;
 	},
 	function(errorCode) {
 	    app.showInfo('Error: Connection failed: ' + errorCode);
@@ -206,8 +211,7 @@ app.connectToDevice = function(device)
 /**
  * Dump all information on named device to the console
  */
-app.readServices = function(device)
-{
+app.readServices = function(device) {
     // Read all services.
     device.readServices(
 	null,
@@ -217,6 +221,8 @@ app.readServices = function(device)
 	    // Debug logging of all services, characteristics and descriptors
 	    // reported by the BLE board.
 	    app.logAllServices(app.device);
+
+	    app.initDeviceState();
 	},
 	function(error) {
 	    console.log('Error: Failed to read services: ' + error);
@@ -248,19 +254,21 @@ app.onConnectButton = function() {
 };
 
 app.onFall = function() {
-    console.log("state: " + app.state);
-    if(app.state == 0)
-      { app.state = 3; }
-    app.writeToBle(app.state);
+    console.log("Fall detected!");
+    app.showInfo("Fall Detected!!");
+    if(app.sentState != 3)
+      { app.sentState = 3; }
+    app.writeToBle(app.sentState);
 }
 
 app.writeToBle = function(newState) {
     var ledState = new Uint8Array(1);
     ledState = newState;
+    console.log("New state: " + ledState);
     app.device.writeCharacteristic(
     	'0000a002-0000-1000-8000-00805f9b34fb',
     	ledState,
-    	function() { console.log('LED toggled successfully!'); },
+    	function() { console.log('Written to BLE successfully!'); },
     	function(error) { console.log('LED toggle failed: ' + error); }
     );
 }
@@ -281,13 +289,13 @@ app.onToggleButton = function() {
     	return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    app.state = getRandomInt(0, 3);
-    console.log("state: " + app.state);
+    app.sentState = getRandomInt(0, 3);
+    console.log("state: " + app.sentState);
 
     var ledState = new Uint8Array(1);
 
     /* for now just do this randomly */
-    ledState[0] = app.state;
+    ledState[0] = app.sentState;
 
     app.device.writeCharacteristic(
     	'0000a002-0000-1000-8000-00805f9b34fb',
@@ -298,10 +306,30 @@ app.onToggleButton = function() {
 }
 
 /**
+ * Toggle the LED on/off.
+ */
+app.initDeviceState = function() {
+    app.sentState = 0;
+    console.log("Initialise State: " + app.sentState);
+
+    var ledState = new Uint8Array(1);
+    
+    /* for now just do this randomly */
+    ledState[0] = app.sentState;
+
+    app.device.writeCharacteristic(
+    	'0000a002-0000-1000-8000-00805f9b34fb',
+    	ledState,
+    	function() { console.log('Initialised state successfully'); },
+    	function(error) { console.log('Failed to initialise state: ' + error); }
+    );
+}
+
+
+/**
  * Debug logging of found services, characteristics and descriptors.
  */
-app.logAllServices = function(device)
-{
+app.logAllServices = function(device) {
     // Here we simply print found services, characteristics,
     // and descriptors to the debug console in Evothings Workbench.
 
@@ -311,22 +339,19 @@ app.logAllServices = function(device)
 
     // Print all services.
     console.log('Found services:');
-    for (var serviceUUID in device.__services)
-    {
+    for (var serviceUUID in device.__services) {
 	var service = device.__services[serviceUUID];
 	console.log('  service: ' + service.uuid);
 
 	// Print all characteristics for service.
-	for (var characteristicUUID in service.__characteristics)
-	{
+	for (var characteristicUUID in service.__characteristics) {
 	    var characteristic = service.__characteristics[characteristicUUID];
 	    console.log('    characteristic: ' + characteristic.uuid);
 
 	    // Print all descriptors for characteristic.
-	    for (var descriptorUUID in characteristic.__descriptors)
-	    {
+	    for (var descriptorUUID in characteristic.__descriptors) {
 		var descriptor = characteristic.__descriptors[descriptorUUID];
-		console.log('      descriptor: ' + descriptor.uuid);
+		console.log('descriptor: ' + descriptor.uuid);
 	    }
 	}
     }

@@ -31,26 +31,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
-
-    <style>
-      #connectButton {
-      width: 49%;
-      float: left;
-      }
-
-      #toggleButton {
-      width: 49%;
-      float: right;
-      }
-
-      #deviceName {
-      width: 100%;
-      display: block;
-      -webkit-box-sizing: border-box;
-      box-sizing: border-box;
-      }
-    </style>
-
     <script>
       // Redirect console.log to Evothings Workbench.
       if (window.hyper && window.hyper.log) { console.log = hyper.log }
@@ -70,34 +50,57 @@
       <h1>Fall Detector </h1>
     </div>
 
-
     <div class="input-group">
 
-	<span class="input-group-addon" id="input-label-1">Device Name</span>
-	<input id="deviceName" placeholder="Enter your device name" value="Dave" type="text" class="form-control" aria-described-by="input-label-1"/>
-</div>
+      <span class="input-group-addon" id="input-label-1">Device Name</span>
+      <input id="deviceName"
+	     placeholder="Enter your device name"
+	     value="Dave" type="text"
+	     class="form-control"
+	     aria-described-by="input-label-1"/>
+    </div>
     <div class="input-group">
-	<span class="input-group-addon" id="input-label-2">Email</span>
-	<input id="emailAddress" placeholder="Enter your email address" value="michael.murphy@capgemini.com" type="email" class="form-control" aria-described-by="input-label-2"/>
+      <span class="input-group-addon" id="input-label-2">Email</span>
+      <input id="emailAddress"
+	     placeholder="Enter your email address"
+	     value="michael.murphy@capgemini.com"
+	     type="email" class="form-control" aria
+	     -described-by="input-label-2"/>
+    </div>
+
+
+    <div class="row" style="margin-top: 10px">
+      <div class="col-xs-3">
+	<button id="connectButton" class="btn btn-info" onclick="app.onConnectButton()">
+	  Connect
+	</button>
+      </div>
+      <div class="col-xs-3">
+	<button id="toggleButton" class="btn btn-warning" onclick="app.onToggleButton()">
+	  Random
+	</button>
+      </div>
+      <div class="col-xs-3">
+	<button id="initButton" class="btn btn-danger" onclick="app.initDeviceState()" disabled="!app.isConnected">
+	  Reset
+	</button>
+      </div>
+      <div class="col-xs-3">
+	<button id="fallButton" class="btn btn-danger" onclick="app.onFall()" disabled="!app.isConnected">
+	  Fall
+	</button>
       </div>
     </div>
 
-    <button id="connectButton" class="btn btn-default" onclick="app.onConnectButton()" style="margin-top: 10px">
-      Connect
-    </button>
-
-    <!-- <button id="toggleButton" class="btn red" onclick="app.onToggleButton()"> -->
-    <!--   Toggle LED -->
-    <!-- </button> -->
-    
-    <br />
-
-    <div class="well" style="margin-top: 50px">
-      <p id="info">Not Connected</p>
-      <p id="statusInfo">Status NULL</p>
-      <p id="accInfo">dx: null ; <br /> dy: null ; <br /> dz: null</p>
+    <div class="row">
+      <div class="col-lg-12">
+	<div class="well" style="margin-top: 50px">
+	  <p id="info">Not Connected</p>
+	  <p id="statusInfo">Status NULL</p>
+	  <p id="accInfo">dx: null ; <br /> dy: null ; <br /> dz: null</p>
+	</div>
+      </div>
     </div>
-
   </body>
 
 </html>
