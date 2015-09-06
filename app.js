@@ -14,6 +14,7 @@
  * Object that holds application data and functions.
  */
 var app = {};
+var isConnected = false;
 
 /**
  * Name of device to connect to.
@@ -61,21 +62,20 @@ app.initialiseAccelerometer = function() {
 
 app.accelerometerHandler = function(accelerationX, accelerationY, accelerationZ) {
     function absGrav(x) {
-	return (Math.abs(x) / 9.8)-1;
+	return (Math.abs(x) / 9.8);
     }
 
     var grav = 9.81;
-    var dx = absGrav(accelerationX).toFixed(2);
-    var dy = absGrav(accelerationY).toFixed(2);
-    var dz = absGrav(accelerationZ).toFixed(2);
+    var dx = absGrav(accelerationX).toFixed(4);
+    var dy = absGrav(accelerationY).toFixed(4);
+    var dz = absGrav(accelerationZ).toFixed(4);
     document.getElementById("accInfo").innerHTML = "dx: " + dx + " ; dy: " + dy + " ; dz: " + dz;
 
-    if(app.isConnected) {
-	if(dx+dy+dz > 2){
+    if(isConnected) {
+	if(dx+dy+dz > 1){
 	    console.log(app.numFalls + " falls detected!!");
 	    app.numFalls++;
 	    app.onFall();
-	    app.sendPost("Fall Detected");
 	}
     }
 }
@@ -175,11 +175,8 @@ app.pollStatus = setInterval(function() {
 		/* should only be able to cancel if the state is 3 .. ie. a fall was detected and sent */
 		if((readState == 4 || readState == 5)
 		   && app.sentState == 3) {
+		    app.writeToBle(0);
 		    app.sendPost("Fall Alert Cancelled");
-		}
-
-		if(app.sentState != readState) {
-		    app.writeToBle(app.sentState);
 		}
 	    }, 
 	    function(error) {
@@ -202,6 +199,7 @@ app.connectToDevice = function(device)
 	    app.readServices(app.device);
 	    app.pollStatus;
 	    app.isConnected = true;
+	    console.log("Connected: " + app.isConnected);
 	},
 	function(errorCode) {
 	    app.showInfo('Error: Connection failed: ' + errorCode);
@@ -259,12 +257,13 @@ app.onFall = function() {
     if(app.sentState != 3)
       { app.sentState = 3; }
     app.writeToBle(app.sentState);
+    app.sendPost("Fall Detected");
 }
 
 app.writeToBle = function(newState) {
     var ledState = new Uint8Array(1);
-    ledState = newState;
-    console.log("New state: " + ledState);
+    ledState[0] = newState;
+    console.log("New state: " + ledState[0]);
     app.device.writeCharacteristic(
     	'0000a002-0000-1000-8000-00805f9b34fb',
     	ledState,
